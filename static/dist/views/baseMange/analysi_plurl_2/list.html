@@ -1,0 +1,174 @@
+
+
+<title>胜负彩管理</title>
+  
+<div class="layui-card layadmin-header">
+  <div class="layui-breadcrumb" lay-filter="breadcrumb">
+    <a lay-href="">主页</a>
+    <a><cite>基础数据</cite></a>
+    <a><cite>胜负彩管理</cite></a>
+  </div>
+</div>
+
+<div class="layui-fluid">   
+  <div class="layui-card">
+    <div class="layui-form layui-card-header layuiadmin-card-header-auto" lay-filter="layadmin-plurl2-formlist">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">期号</label>
+            <div class="layui-input-block">
+                    <select name="expect" lay-search="" id="expect">
+                          <option value="21001">21001</option>
+                          <option value="21002">21002</option>
+                          <option value="21003">21003</option>
+                    </select>
+            </div>
+        </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">赔次</label>
+            <div class="layui-input-block">
+                    <select name="peiname" lay-search="">
+                        <option value="">全部</option>
+                        <option value="一赔">一赔</option>
+                        <option value="二赔">二赔</option>
+                          <option value="三赔">三赔</option>
+                          <option value="零赔">零赔</option>
+                    </select>
+            </div>
+        </div>
+         <div class="layui-inline">
+          <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-plurl2-back-search">
+            <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="layui-card-body">
+      <div style="padding-bottom: 10px;">
+        <button class="layui-btn layuiadmin-btn-admin" data-type="batchdel">删除</button>
+        <button class="layui-btn layuiadmin-btn-admin" data-type="fenxi">分析当前期</button>
+      </div>
+      
+      <table id="LAY-plurl2-back-manage" lay-filter="LAY-plurl2-back-manage"></table>
+
+        <script type="text/html" id="table-plurl2-peivalue">
+            {{#
+              var fn = function(d){
+                    var arr = new Array();
+
+                    var tip = "场次："+d.ordernum+" 胜平负："+d.spf;
+                    if(d.spf==d.result){
+                        arr.push(" <span class='layui-badge' title='\"+tip+"\'> ");
+                    }else{
+                        arr.push(" <span class='layui-badge layui-bg-gray' title='\"+tip+"\'> ");
+                    }
+                    arr.push(d.plurl);
+                    arr.push(" </span> ");
+                    return arr.join("");
+              }
+            }}
+            {{ fn(d) }}
+      </script>
+      <script type="text/html" id="table-plurl2-admin">
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="edit">3</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary">1</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="del">0</a>
+      </script>
+    </div>
+  </div>
+</div>
+
+<script>
+layui.use('basemanage', layui.factory('basemanage')).use(['admin', 'basemanage', 'table'], function(){
+  var $ = layui.$
+  ,admin = layui.admin
+  ,view = layui.view
+  ,table = layui.table
+  ,form = layui.form;
+
+
+
+  form.render(null, 'layadmin-plurl2-formlist');
+  
+  //监听搜索
+  form.on('submit(LAY-plurl2-back-search)', function(data){
+    var field = data.field;
+    
+    //执行重载
+    table.reload('LAY-plurl2-back-manage', {
+      where: field
+    });
+  });
+
+    //执行 Ajax 后重载
+    admin.req({
+        type:"POST",
+        url:"/get_expect_list/",
+        data:{},
+        dataType:'json',
+        success:function (r) {
+            $("#expect").empty();
+            var d = r.data;
+            d.reverse();
+            for(var k=0;k<d.length;k++){
+
+                $("#expect").append("<option value='"+d[k]+"'>"+d[k]+"</option>");
+            }
+            form.render();
+        }
+    });
+
+  //事件
+  var active = {
+      //批量删除方法
+    batchdel: function(){
+      var checkStatus = table.checkStatus('LAY-plurl2-back-manage')
+      ,checkData = checkStatus.data; //得到选中的数据
+      if(checkData.length === 0){
+        return layer.msg('请选择数据');
+      }
+        layer.confirm('确定删除吗？', function(index) {
+          //执行 Ajax 后重载
+          admin.req({
+            type:"POST",
+             url:"/plurl2_batchdel/",
+              data:{"ids":JSON.stringify(checkData)},
+            dataType:'json',
+            //不加这个，ajax会将结果后边加个[]，例如{'vals[]':[4,6,8]}
+            traditional:true,
+　　　　　　  //不加这个，会报服务器终止了一个在运行的程序
+            async: false,
+                  success:function (r) {
+                      layer.alert(r.msg);
+                      layui.table.reload("LAY-plurl2-back-manage");
+                  }
+          });
+          table.reload('LAY-plurl2-back-manage');
+          layer.msg('已删除');
+        });
+    }
+    ,fenxi: function(){
+            var expect = $("#expect").val(); //获取提交的字段
+              //提交 Ajax 成功后，关闭当前弹层并重载表格
+              $.ajax({
+                  type:"POST",
+                  url:"/fenxi/",
+                  data: {"expect":expect},
+                  dataType:"json",
+                  success:function (d) {
+                      if(d.code==-1) {
+                          layer.msrg(d.msg);
+                      }else{
+                           layui.table.reload('LAY-plurl2-back-manage'); //重载表格
+                      }
+                  }
+              });
+    }
+  }  
+  $('.layui-btn.layuiadmin-btn-admin').on('click', function(){
+    var type = $(this).data('type');
+    active[type] ? active[type].call(this) : '';
+  });
+});
+</script>

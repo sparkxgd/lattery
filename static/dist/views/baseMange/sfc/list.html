@@ -1,0 +1,166 @@
+
+
+<title>胜负彩管理</title>
+  
+<div class="layui-card layadmin-header">
+  <div class="layui-breadcrumb" lay-filter="breadcrumb">
+    <a lay-href="">主页</a>
+    <a><cite>基础数据</cite></a>
+    <a><cite>胜负彩管理</cite></a>
+  </div>
+</div>
+
+<div class="layui-fluid">   
+  <div class="layui-card">
+    <div class="layui-form layui-card-header layuiadmin-card-header-auto" lay-filter="layadmin-sfc-formlist">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">期号</label>
+            <div class="layui-input-block">
+                    <select name="expect" lay-search="" id="expect_select">
+                          <option value="21001">21001</option>
+                          <option value="21002">21002</option>
+                          <option value="21003">21003</option>
+                    </select>
+            </div>
+        </div>
+         <div class="layui-inline">
+          <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-sfc-back-search">
+            <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="layui-card-body">
+      <div style="padding-bottom: 10px;">
+        <button class="layui-btn layuiadmin-btn-admin" data-type="updatekj">更新奖金数据</button>
+        <button class="layui-btn layuiadmin-btn-admin" data-type="add">更新</button>
+      </div>
+      
+      <table id="LAY-sfc-back-manage" lay-filter="LAY-sfc-back-manage"></table>
+        <script type="text/html" id="table-sfc-result">
+            {{#
+              var fn = function(d,r){
+                var arr = [d.sfcdetail__plurl_3,d.sfcdetail__plurl_1,d.sfcdetail__plurl_0];
+                var resArr = arr.sort();
+                var n = "layui-btn-normal";
+                var index = resArr.indexOf(r);
+                if(index==2){
+                    n = "layui-btn-danger";
+                }else if(index==1){
+                    n = "layui-btn-warm";
+                }else{
+                    n = "layui-btn-normal";
+                }
+                return n;
+              };
+            }}
+            {{#  if(d.sfcdetail__result == 3){ }}
+            <a class="layui-btn layui-btn-sm">3</a>
+            <a class="layui-btn layui-btn-sm {{ fn(d,d.sfcdetail__plurl_3) }}">{{ d.sfcdetail__plurl_3}}</a>
+           {{#  } else if(d.sfcdetail__result == 1){ }}
+             <a class="layui-btn layui-btn-sm">1</a>
+             <a class="layui-btn layui-btn-sm {{ fn(d,d.sfcdetail__plurl_1) }}">{{d.sfcdetail__plurl_1}}</a>
+             {{#  } else { }}
+             <a class="layui-btn layui-btn-sm">0</a>
+             <a class="layui-btn layui-btn-sm {{ fn(d,d.sfcdetail__plurl_0) }}">{{d.sfcdetail__plurl_0}}</a>
+            {{#  } }}
+
+
+
+
+      </script>
+      <script type="text/html" id="table-sfc-admin">
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="edit">3</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary">1</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="del">0</a>
+      </script>
+
+        <script type="text/html" id="titleTpl">
+            <a href="#" class="layui-table-link" title="截止时间：{{d.fsendtime}}">{{d.sfcdetail__ordernum}}</a>
+        </script>
+    </div>
+  </div>
+</div>
+
+<script>
+layui.use('basemanage', layui.factory('basemanage')).use(['admin', 'basemanage', 'table'], function(){
+  var $ = layui.$
+  ,admin = layui.admin
+  ,view = layui.view
+  ,table = layui.table
+  ,form = layui.form;
+
+
+
+  form.render(null, 'layadmin-sfc-formlist');
+  
+  //监听搜索
+  form.on('submit(LAY-sfc-back-search)', function(data){
+    var field = data.field;
+    
+    //执行重载
+    table.reload('LAY-sfc-back-manage', {
+      where: field
+    });
+  });
+
+
+  //执行 Ajax 后重载
+    admin.req({
+        type:"POST",
+        url:"/get_expect_list/",
+        data:{},
+        dataType:'json',
+        success:function (r) {
+            $("#expect_select").empty();
+            var d = r.data;
+            d.reverse();
+            for(var k=0;k<d.length;k++){
+
+                $("#expect_select").append("<option value='"+d[k]+"'>"+d[k]+"</option>");
+            }
+            form.render();
+        }
+    });
+
+
+
+  //事件
+  var active = {
+    updatekj: function(){
+          //执行 Ajax 后重载
+          admin.req({
+              type:"POST",
+              url:"/load_kj/",
+              data:{},
+              dataType:'json',
+              success:function (r) {
+                      layer.alert(r.msg);
+                  }
+          });
+    }
+    ,add: function(){
+              $.ajax({
+                  type:"POST",
+                  url:"/update_data/",
+                  data: {},
+                  dataType:"json",
+                  success:function (d) {
+                      if(d.code==-1) {
+                          layer.msrg(d.msg);
+                      }else{
+                           layui.table.reload('LAY-sfc-back-manage'); //重载表格
+                      }
+                  }
+              });
+
+    }
+  }  
+  $('.layui-btn.layuiadmin-btn-admin').on('click', function(){
+    var type = $(this).data('type');
+    active[type] ? active[type].call(this) : '';
+  });
+});
+</script>
