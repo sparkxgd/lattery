@@ -624,7 +624,73 @@ l.render({//胜负彩赔率分析管理的表格
                 var pei_1 = obj.pei_1;
                 var pei_2 = obj.pei_2;
                 var pei_3 = obj.pei_3;
+                var objs= obj.peivalueall;
                 var arr = new Array();
+
+                for(var i=0;i < objs.length;i++){
+                        var tip = "场次："+objs[i].ordernum+" 胜平负："+objs[i].spf;
+                        if(objs[i].spf==objs[i].result){
+                            arr.push(" <span class='layui-badge' title='"+tip+"'> ");
+                        }else{
+                            arr.push(" <span class='layui-badge layui-bg-gray' title='"+tip+"'> ");
+                        }
+                        arr.push(objs[i].plurl);
+                        arr.push(" </span> ");
+                    }
+                arr.push(" </br> ");
+                //分析，获取后面的数据
+                var pervobjs=objs.slice(26,objs.length-1);
+                //定义14场都是310
+                var p_14 = ["310","310","310","310","310","310","310","310","310","310","310","310","310","310"];
+                //出去分析后面的20个，剩下的
+                for(var j=0;j<p_14.length;j++){
+                     for(var i=0;i < pervobjs.length;i++){
+                         if(pervobjs[i].ordernum===j+1){
+                            var spf=pervobjs[i].spf;
+                            var a = p_14[j].replace(spf,'');
+                            p_14[j]=a;
+                         }
+                    }
+                }
+                arr.push("去除20后：");
+                for(var j=0;j<p_14.length;j++){
+                    for(var k in pei_1){
+                        var d = pei_1[k];
+                        if(d.ordernum===(j+1)){
+                            var tip = "场次："+d.ordernum+" 胜平负："+d.spf+" 开奖："+d.result;
+                            if(p_14[j].indexOf(d.result) != -1){
+                                arr.push(" <span class='layui-badge' title='"+tip+"'> ");
+                            }else{
+                                arr.push(" <span class='layui-badge layui-bg-gray' title='"+tip+"'> ");
+                            }
+                        }
+                    }
+                    arr.push(" <span class='layui-badge layui-bg-blue'> ");
+                     arr.push(j+1);
+                     arr.push("</span> ");
+                     arr.push(p_14[j]);
+                     arr.push("</span> ");
+                }
+                arr.push("预测：");
+                var ag=1;
+                var arr_mr = [];
+                while (ag<10){
+                    var mr = Math.floor(Math.random() * 14)+1;
+                    var f = true;
+                    for(k = 0;k < arr_mr.length;k++){
+                        if (mr == arr_mr[k]) {
+                            f = false;
+                             break;
+                         }
+                    }
+                    if(f){
+                         arr_mr[ag]=mr;
+                         ag +=1;
+                    }
+                }
+                arr.push(arr_mr.sort(function(a, b){return a - b}));
+                arr.push(" </br> ");
+
                 arr.push("<table border='1'>");
                 arr.push("<tr>");
 

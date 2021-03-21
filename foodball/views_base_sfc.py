@@ -297,10 +297,12 @@ def get_analysis_plurl_list_3(request):
                 if o["ordernum"] == o3["ordernum"]:
                     pei_3_ord.append(o3)
 
+        peivalue_plurl_sorted = sorted(peivalue, key=lambda i: i["plurl"])
         datas[v]["pei_1"] = pei_1_ord
         datas[v]["pei_2"] = pei_2_ord
         datas[v]["pei_3"] = pei_3_ord
         datas[v]["kj"] = j_v
+        datas[v]["peivalueall"] = peivalue_plurl_sorted
     # 构造返回数据
     if total == 0:
         result = {"code": -1, "msg": "暂无数据！！！", "count": total, "data": datas}
