@@ -714,6 +714,7 @@
                             ag3 += 1;
                         }
                     }
+
                     for (var i = 0; i < arr_mr3.length; i++) {
                         for (var k in pei_3) {
                             if (pei_3[k].ordernum == arr_mr3[i]) {
