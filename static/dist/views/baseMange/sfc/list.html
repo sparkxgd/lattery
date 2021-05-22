@@ -36,6 +36,7 @@
       <div style="padding-bottom: 10px;">
         <button class="layui-btn layuiadmin-btn-admin" data-type="updatekj">更新奖金数据</button>
         <button class="layui-btn layuiadmin-btn-admin" data-type="add">更新</button>
+          <span id="kj"></span>
       </div>
       
       <table id="LAY-sfc-back-manage" lay-filter="LAY-sfc-back-manage"></table>
@@ -99,7 +100,17 @@ layui.use('basemanage', layui.factory('basemanage')).use(['admin', 'basemanage',
   //监听搜索
   form.on('submit(LAY-sfc-back-search)', function(data){
     var field = data.field;
-    
+      //执行 Ajax 后重载
+    admin.req({
+        type:"POST",
+        url:"/get_kj_expect/",
+        data:{"expect":field.expect},
+        dataType:'json',
+        success:function (r) {
+            var d = r.data;
+            $("#kj").text("任九奖金："+d.j91+"元       "+"14场2等奖金："+d.j142+"元");
+        }
+    });
     //执行重载
     table.reload('LAY-sfc-back-manage', {
       where: field

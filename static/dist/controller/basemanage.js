@@ -132,39 +132,172 @@
             url: "/sfcs/",
             cols: [[{
                 field: "expect",
+                width:80,
                 title: "期号"
             }, {
                 field: "sfcdetail__ordernum",
                 title: "序号",
+                width:60,
                 templet: '#titleTpl'
             }, {
                 field: "sfcdetail__hometeam",
+                width:80,
                 title: "主队"
             }, {
                 field: "sfcdetail__guestteam",
+                width:80,
                 title: "客队"
             }, {
                 field: "sfcdetail__homestanding",
-                title: "主队排名"
+                width:80,
+                title: "主排名"
             }, {
                 field: "sfcdetail__gueststanding",
-                title: "客队排名"
+                width:80,
+                title: "客排名"
             }, {
                 field: "sfcdetail__plurl_3",
+                width:80,
                 title: "胜赔率"
             }, {
                 field: "sfcdetail__plurl_1",
+                width:80,
                 title: "平赔率"
             }, {
                 field: "sfcdetail__plurl_0",
+                width:80,
                 title: "负赔率"
             }, {
                 field: "sfcdetail__result",
                 title: "结果<span class='layui-badge layui-bg-blue'>一赔</span><span class='layui-badge layui-bg-orange'>二赔</span><span class='layui-badge layui-bg-danger'>三赔</span>",
-                width: 200
-                , toolbar: "#table-sfc-result"
+                toolbar: "#table-sfc-result",
+                width:170
+            }, {
+                field: "sfcdetail__result",
+                title: "分析(排名)",
+                templet: function (d) {
+                    var arr = new Array();
+                    var c = parseFloat(d.sfcdetail__homestanding)-parseFloat(d.sfcdetail__gueststanding);
+                    if(c<0){
+                        if(d.sfcdetail__result==3){
+                            arr.push("</span><span class='layui-badge layui-bg-danger'>3</span>")
+                        }else{
+                            arr.push(3)
+                        }
+
+                    }
+                    if(c>0){
+                        if(d.sfcdetail__result==0){
+                            arr.push("</span><span class='layui-badge layui-bg-danger'>0</span>")
+                        }else{
+                            arr.push(0)
+                        }
+                    }
+                    if(3>c&&c>-3) {
+                        if(d.sfcdetail__result==1){
+                            arr.push("</span><span class='layui-badge layui-bg-danger'>1</span>")
+                        }else{
+                            arr.push(1)
+                        }
+                    }
+
+                    return arr.join(" ")
+                }
+            }, {
+                field: "sfcdetail__result",
+                title: "<span title='分析方法：获取一赔，除去平为三赔,防胜为三赔，胜负2.00-2.20防平'>分析(一赔)</span> ",
+                templet: function (d) {
+                    var arr = new Array();
+                    var p3 = parseFloat(d.sfcdetail__plurl_3);
+                    var p1 = parseFloat(d.sfcdetail__plurl_1);
+                    var p0 = parseFloat(d.sfcdetail__plurl_0);
+                    if(1.90<p3&&p3<2.20){
+                            if (d.sfcdetail__result == 1) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>1</span>")
+                            } else {
+                                arr.push(1)
+                            }
+                    }
+                    if(1.90<p0&&p0<2.20){
+                            if (d.sfcdetail__result == 1) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>1</span>")
+                            } else {
+                                arr.push(1)
+                            }
+                    }
+                    if (p3 < p1) {
+                        if (p3 < p0) {
+                            if (d.sfcdetail__result == 3) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>3</span>")
+                            } else {
+                                arr.push(3)
+                            }
+                            if(p0<p1){
+                                if (d.sfcdetail__result == 0) {
+                                    arr.push("</span><span class='layui-badge layui-bg-danger'>0</span>")
+                                } else {
+                                    arr.push(0)
+                                }
+                            }
+                        } else {
+                            if (d.sfcdetail__result == 0) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>0</span>")
+                            } else {
+                                arr.push(0)
+                            }
+                            if (d.sfcdetail__result == 3) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>3</span>")
+                            } else {
+                                arr.push(3)
+                            }
+                        }
+                    } else {
+                        if (p1 < p0) {
+                            if (d.sfcdetail__result == 1) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>1</span>")
+                            } else {
+                                arr.push(1)
+                            }
+                        } else {
+                            if (d.sfcdetail__result == 0) {
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>0</span>")
+                            } else {
+                                arr.push(0)
+                            }
+                            if(p3>p0){
+                                if (d.sfcdetail__result == 3) {
+                                    arr.push("</span><span class='layui-badge layui-bg-danger'>3</span>")
+                                } else {
+                                    arr.push(3)
+                                }
+                            }
+                        }
+                    }
+                    return arr.join(" ")
+                }
+            },
+                {
+                field: "sfcdetail__result",
+                title: "分析(平为三赔)",
+                templet: function (d) {
+                    var arr = new Array();
+                    var p3=parseFloat(d.sfcdetail__plurl_3);
+                    var p1=parseFloat(d.sfcdetail__plurl_1);
+                    var p0=parseFloat(d.sfcdetail__plurl_0);
+
+                    if(p3<p1){
+                        if(p0<p1){
+                            if(d.sfcdetail__result==1){
+                                arr.push("</span><span class='layui-badge layui-bg-danger'>1</span>")
+                            }else{
+                                arr.push(1)
+                            }
+                        }
+                    }
+                    return arr.join(" ")
+                }
             }
-                , {title: "操作", width: 400, align: "center", fixed: "right", toolbar: "#table-sfc-admin"}]],
+                , {title: "操作", align: "center", fixed: "right", toolbar: "#table-sfc-admin"}]],
             text: "对不起，加载出现异常！"
         }), l.on("tool(LAY-floor-back-manage)", function (e) {
         var l = e.data;

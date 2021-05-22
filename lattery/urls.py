@@ -29,5 +29,6 @@ urlpatterns = [
     path('fenxi_all/', views_base_sfc.analysis_plurl_all),
     path('update_data/', views_base_sfc.update_data),
     path('get_expect_list/', views_base_sfc.get_expect_list),
+    path('get_kj_expect/', views_base_sfc.get_kj_expect),
     path('load_kj/', views_base_sfc.load_kj_data),
 ]

@@ -112,6 +112,15 @@ def get_expect_list(request):
     result = {"code": 0, "msg": "查询成功！！", "count": 0, "data": expects}
     return JsonResponse(result)
 
+
+#   获取奖金
+def get_kj_expect(request):
+    expect = request.POST.get("expect")
+    values =list(Mo.objects.filter(expect=expect).values())
+    result = {"code": 0, "msg": "查询成功！！", "count": 0, "data": values[0]}
+    return JsonResponse(result)
+
+
 #   更新数据
 def update_data(request):
     result = {"code": 0, "msg": "更新成功！"}
